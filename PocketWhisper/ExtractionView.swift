@@ -1,7 +1,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
-
+import PhotosUI
 struct ExtractionView: View {
     @State private var selectedFileURL: URL?
     @State private var isImporting: Bool = false
@@ -10,7 +10,7 @@ struct ExtractionView: View {
     @State private var selectedModel: String = "tiny"
     @State private var selectedLanguage: String = "auto"
     @State private var availableModels: [String] = []
-    
+    @State private var selectedPhotoItem: PhotosPickerItem?
     var body: some View {
         NavigationView {
             ScrollView {
@@ -61,8 +61,11 @@ struct ExtractionView: View {
                     
                     // Actions
                     HStack(spacing: 20) {
-                        Button(action: { isImporting = true }) {
-                            Label("Select File", systemImage: "folder")
+                        PhotosPicker(
+                            selection: $selectedPhotoItem,
+                            matching: .any(of: [.videos, .audio])
+                        ) {
+                            Label("Select from Photos", systemImage: "photo.on.rectangle")
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.blue)
@@ -128,22 +131,19 @@ struct ExtractionView: View {
             }
             .navigationTitle("Extraction")
             .onAppear(perform: refreshModels)
-            .fileImporter(
-                isPresented: $isImporting,
-                allowedContentTypes: [UTType.audio, UTType.movie],
-                allowsMultipleSelection: false
-            ) { result in
-                do {
-                    // Security-scoped resources must be accessed properly
-                    let url = try result.get().first!
-                    if url.startAccessingSecurityScopedResource() {
-                        selectedFileURL = url
-                        // Do not stop accessing immediately if we want to read it later,
-                        // but usually better to copy to tmp if we need prolonged access.
-                        // For this demo, we keep the handle open or re-open in manager.
+            .onChange(of: selectedPhotoItem) { newItem in
+                guard let item = newItem else { return }
+
+                Task {
+                    do {
+                        if let tempURL = try await exportToTemporaryFile(from: item) {
+                            DispatchQueue.main.async {
+                                self.selectedFileURL = tempURL
+                            }
+                        }
+                    } catch {
+                        print("Failed to load media: \(error)")
                     }
-                } catch {
-                    print("Error selecting file: \(error.localizedDescription)")
                 }
             }
             .fileExporter(
@@ -161,6 +161,20 @@ struct ExtractionView: View {
         }
     }
 
+    
+    func exportToTemporaryFile(from item: PhotosPickerItem) async throws -> URL? {
+        // 优先拿视频文件
+        if let data = try await item.loadTransferable(type: Data.self) {
+            let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "mov"
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension(ext)
+
+            try data.write(to: url)
+            return url
+        }
+        return nil
+    }
     
     func refreshModels() {
         let fileManager = FileManager.default
