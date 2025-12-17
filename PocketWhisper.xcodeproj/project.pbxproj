@@ -8,6 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		8299912B2EF290A800D2A54E /* whisper in Frameworks */ = {isa = PBXBuildFile; productRef = 8299912A2EF290A800D2A54E /* whisper */; };
+		829991532EF29FD700D2A54E /* ffmpegkit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991432EF29FB400D2A54E /* ffmpegkit.xcframework */; };
+		829991542EF29FD700D2A54E /* ffmpegkit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991432EF29FB400D2A54E /* ffmpegkit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		829991562EF29FD800D2A54E /* libavcodec.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991442EF29FB400D2A54E /* libavcodec.xcframework */; };
+		829991572EF29FD800D2A54E /* libavcodec.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991442EF29FB400D2A54E /* libavcodec.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		829991582EF29FDA00D2A54E /* libavdevice.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991452EF29FB400D2A54E /* libavdevice.xcframework */; };
+		829991592EF29FDA00D2A54E /* libavdevice.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991452EF29FB400D2A54E /* libavdevice.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8299915A2EF29FDB00D2A54E /* libavfilter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991462EF29FB400D2A54E /* libavfilter.xcframework */; };
+		8299915B2EF29FDB00D2A54E /* libavfilter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991462EF29FB400D2A54E /* libavfilter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8299915C2EF29FDD00D2A54E /* libavformat.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991472EF29FB400D2A54E /* libavformat.xcframework */; };
+		8299915D2EF29FDD00D2A54E /* libavformat.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991472EF29FB400D2A54E /* libavformat.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8299915E2EF29FDE00D2A54E /* libavutil.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991482EF29FB400D2A54E /* libavutil.xcframework */; };
+		8299915F2EF29FDE00D2A54E /* libavutil.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991482EF29FB400D2A54E /* libavutil.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		829991602EF29FE000D2A54E /* libswresample.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829991492EF29FB400D2A54E /* libswresample.xcframework */; };
+		829991612EF29FE000D2A54E /* libswresample.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829991492EF29FB400D2A54E /* libswresample.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		829991622EF29FE100D2A54E /* libswscale.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8299914A2EF29FB400D2A54E /* libswscale.xcframework */; };
+		829991632EF29FE100D2A54E /* libswscale.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8299914A2EF29FB400D2A54E /* libswscale.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,10 +43,39 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		829991552EF29FD700D2A54E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				829991542EF29FD700D2A54E /* ffmpegkit.xcframework in Embed Frameworks */,
+				829991592EF29FDA00D2A54E /* libavdevice.xcframework in Embed Frameworks */,
+				8299915B2EF29FDB00D2A54E /* libavfilter.xcframework in Embed Frameworks */,
+				829991572EF29FD800D2A54E /* libavcodec.xcframework in Embed Frameworks */,
+				8299915F2EF29FDE00D2A54E /* libavutil.xcframework in Embed Frameworks */,
+				8299915D2EF29FDD00D2A54E /* libavformat.xcframework in Embed Frameworks */,
+				829991632EF29FE100D2A54E /* libswscale.xcframework in Embed Frameworks */,
+				829991612EF29FE000D2A54E /* libswresample.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		829990F42EF28DBC00D2A54E /* PocketWhisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		829991012EF28DBE00D2A54E /* PocketWhisperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PocketWhisperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8299910B2EF28DBE00D2A54E /* PocketWhisperUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PocketWhisperUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		829991432EF29FB400D2A54E /* ffmpegkit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = ffmpegkit.xcframework; sourceTree = "<group>"; };
+		829991442EF29FB400D2A54E /* libavcodec.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libavcodec.xcframework; sourceTree = "<group>"; };
+		829991452EF29FB400D2A54E /* libavdevice.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libavdevice.xcframework; sourceTree = "<group>"; };
+		829991462EF29FB400D2A54E /* libavfilter.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libavfilter.xcframework; sourceTree = "<group>"; };
+		829991472EF29FB400D2A54E /* libavformat.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libavformat.xcframework; sourceTree = "<group>"; };
+		829991482EF29FB400D2A54E /* libavutil.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libavutil.xcframework; sourceTree = "<group>"; };
+		829991492EF29FB400D2A54E /* libswresample.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libswresample.xcframework; sourceTree = "<group>"; };
+		8299914A2EF29FB400D2A54E /* libswscale.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libswscale.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -57,6 +102,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				8299912B2EF290A800D2A54E /* whisper in Frameworks */,
+				829991602EF29FE000D2A54E /* libswresample.xcframework in Frameworks */,
+				829991562EF29FD800D2A54E /* libavcodec.xcframework in Frameworks */,
+				829991532EF29FD700D2A54E /* ffmpegkit.xcframework in Frameworks */,
+				829991582EF29FDA00D2A54E /* libavdevice.xcframework in Frameworks */,
+				8299915E2EF29FDE00D2A54E /* libavutil.xcframework in Frameworks */,
+				8299915A2EF29FDB00D2A54E /* libavfilter.xcframework in Frameworks */,
+				829991622EF29FE100D2A54E /* libswscale.xcframework in Frameworks */,
+				8299915C2EF29FDD00D2A54E /* libavformat.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +136,7 @@
 				829990F62EF28DBC00D2A54E /* PocketWhisper */,
 				829991042EF28DBE00D2A54E /* PocketWhisperTests */,
 				8299910E2EF28DBE00D2A54E /* PocketWhisperUITests */,
+				829991402EF29F4500D2A54E /* Frameworks */,
 				829990F52EF28DBC00D2A54E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +151,21 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		829991402EF29F4500D2A54E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				829991432EF29FB400D2A54E /* ffmpegkit.xcframework */,
+				829991442EF29FB400D2A54E /* libavcodec.xcframework */,
+				829991452EF29FB400D2A54E /* libavdevice.xcframework */,
+				829991462EF29FB400D2A54E /* libavfilter.xcframework */,
+				829991472EF29FB400D2A54E /* libavformat.xcframework */,
+				829991482EF29FB400D2A54E /* libavutil.xcframework */,
+				829991492EF29FB400D2A54E /* libswresample.xcframework */,
+				8299914A2EF29FB400D2A54E /* libswscale.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -107,6 +176,7 @@
 				829990F02EF28DBC00D2A54E /* Sources */,
 				829990F12EF28DBC00D2A54E /* Frameworks */,
 				829990F22EF28DBC00D2A54E /* Resources */,
+				829991552EF29FD700D2A54E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -407,6 +477,8 @@
 				DEVELOPMENT_TEAM = 6TQN9US27R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PocketWhisper needs access to save the subtitled video to your Photos.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Required for audio transcription.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -436,6 +508,8 @@
 				DEVELOPMENT_TEAM = 6TQN9US27R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PocketWhisper needs access to save the subtitled video to your Photos.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Required for audio transcription.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
