@@ -20,7 +20,7 @@ class WhisperManager: ObservableObject {
         self.params.print_progress = false
         self.params.print_timestamps = true
         self.params.translate = false
-        self.params.n_threads = 4
+        self.params.n_threads = 4 // Lower threads to save memory on larger models
         
         // Auto-detect language
         // In C-API, usually nullptr means auto-detect.
@@ -80,12 +80,24 @@ class WhisperManager: ObservableObject {
             throw WhisperError.contextInitializationFailed
         }
         
+        // Optimize: Ensure we don't hold unnecessary references if possible
+        // But for C-interop we just need the pointer.
+        
         self.currentModelPath = modelURL.path
         print("Model loaded.")
     }
+
+    /// Free memory manually
+    func releaseContext() {
+        if let c = ctx {
+            whisper_free(c)
+            ctx = nil
+            currentModelPath = nil
+        }
+    }
     
     /// Main inference function
-    func transcribe(audioURL: URL, modelName: String) async throws -> String {
+    func transcribe(audioURL: URL, modelName: String, language: String? = nil) async throws -> String {
         // Ensure model is loaded
         try loadModel(modelName: modelName)
         
@@ -99,10 +111,25 @@ class WhisperManager: ObservableObject {
         
         print("Running inference on \(floats.count) samples...")
         
+        // Setup Params with Language
+        var runParams = self.params
+        // C-String Safety: The pointer must be valid during whisper_full
+        // We use a temporary helper to keep the string alive if needed,
+        // but since this is async, we need to be careful.
+        // Actually, let's just use the NSString bridge which is standard.
+        var langPtr: UnsafePointer<CChar>? = nil
+        let langStr: String? = language
+        
+        // If language is set, use it. Otherwise nil (Auto-detect)
+        if let l = langStr {
+            langPtr = (l as NSString).utf8String
+        }
+        runParams.language = langPtr
+        
         // Run Whisper (Blocking C call)
         // We wrap it in a Task detatchment or similar if we want to avoid freezing main thread,
         // but 'async' function here runs on background already usually.
-        let ret = whisper_full(context, self.params, floats, Int32(floats.count))
+        let ret = whisper_full(context, runParams, floats, Int32(floats.count))
         
         if ret != 0 {
             throw WhisperError.inferenceFailed(Int(ret))

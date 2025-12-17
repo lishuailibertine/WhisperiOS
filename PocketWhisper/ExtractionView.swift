@@ -8,6 +8,7 @@ struct ExtractionView: View {
     @State private var transcriptionResult: String = "No transcription yet."
     @State private var isProcessing: Bool = false
     @State private var selectedModel: String = "tiny"
+    @State private var selectedLanguage: String = "auto"
     @State private var availableModels: [String] = []
     
     var body: some View {
@@ -47,6 +48,16 @@ struct ExtractionView: View {
                         .pickerStyle(SegmentedPickerStyle())
                         .padding(.horizontal)
                     }
+                    
+                    // Language Selection
+                    Picker("Language", selection: $selectedLanguage) {
+                        Text("Auto").tag("auto")
+                        Text("Chinese (Simplified)").tag("zh")
+                        Text("English").tag("en")
+                        Text("Japanese").tag("ja")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
                     
                     // Actions
                     HStack(spacing: 20) {
@@ -188,7 +199,8 @@ struct ExtractionView: View {
         
         Task {
             do {
-                let text = try await WhisperManager.shared.transcribe(audioURL: url, modelName: selectedModel)
+                let lang = selectedLanguage == "auto" ? nil : selectedLanguage
+                let text = try await WhisperManager.shared.transcribe(audioURL: url, modelName: selectedModel, language: lang)
                 
                 DispatchQueue.main.async {
                     self.transcriptionResult = text

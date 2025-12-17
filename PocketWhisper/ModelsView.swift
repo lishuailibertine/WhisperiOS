@@ -19,6 +19,10 @@ struct ModelsView: View {
     @State private var isDownloading: Set<String> = []
     @State private var errorMessage: String?
     
+    // Delete Confirmation State
+    @State private var showDeleteAlert = false
+    @State private var modelToDelete: String?
+    
     var body: some View {
         NavigationView {
             List {
@@ -43,8 +47,14 @@ struct ModelsView: View {
                             Spacer()
                             
                             if downloadedModels.contains(modelName) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
+                                Button(action: {
+                                    modelToDelete = modelName
+                                    showDeleteAlert = true
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.borderless) // Important to not trigger row selection if any
                             } else if isDownloading.contains(modelName) {
                                 VStack {
                                     ProgressView(value: downloadProgress[modelName] ?? 0.0)
@@ -66,15 +76,27 @@ struct ModelsView: View {
             }
             .navigationTitle("Models")
             .onAppear(perform: checkLocalModels)
+            .alert(isPresented: $showDeleteAlert) {
+                Alert(
+                    title: Text("Delete Model"),
+                    message: Text("Are you sure you want to delete '\(modelToDelete?.capitalized ?? "this model")'?"),
+                    primaryButton: .destructive(Text("Delete")) {
+                        if let model = modelToDelete {
+                            deleteModel(name: model)
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
         }
     }
     
     func descriptionFor(_ model: String) -> String {
         switch model {
-        case "tiny": return "~75 MB. Fastest."
-        case "base": return "~140 MB. Balanced."
-        case "small": return "~460 MB. Good accuracy."
-        case "medium": return "~1.5 GB. Slow on older phones."
+        case "tiny": return "~75 MB. Multilingual (Fastest)."
+        case "base": return "~140 MB. Multilingual (Balanced)."
+        case "small": return "~460 MB. Multilingual (Recommended for Chinese)."
+        case "medium": return "~1.5 GB. Multilingual (Best quality, high RAM)."
         default: return ""
         }
     }
@@ -146,5 +168,21 @@ struct ModelsView: View {
         // as implementing NSObject, URLSessionDownloadDelegate in a SwiftUI struct view is verbose.
         
         task.resume()
+    }
+    
+    func deleteModel(name: String) {
+        let fileManager = FileManager.default
+        guard let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let destination = docDir.appendingPathComponent("ggml-\(name).bin")
+        
+        do {
+            if fileManager.fileExists(atPath: destination.path) {
+                try fileManager.removeItem(at: destination)
+                // Refresh local state
+                downloadedModels.remove(name)
+            }
+        } catch {
+            self.errorMessage = "Failed to delete: \(error.localizedDescription)"
+        }
     }
 }
