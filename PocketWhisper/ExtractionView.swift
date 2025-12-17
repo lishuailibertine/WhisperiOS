@@ -8,6 +8,7 @@ struct ExtractionView: View {
     @State private var transcriptionResult: String = "No transcription yet."
     @State private var isProcessing: Bool = false
     @State private var selectedModel: String = "tiny"
+    @State private var availableModels: [String] = []
     
     var body: some View {
         NavigationView {
@@ -32,13 +33,20 @@ struct ExtractionView: View {
                         ContentUnavailableView("No Media Selected", systemImage: "waveform.badge.plus", description: Text("Select an audio or video file to begin."))
                     }
                     
-                    Picker("Model", selection: $selectedModel) {
-                        Text("Tiny").tag("tiny")
-                        Text("Base").tag("base")
-                        Text("Small").tag("small")
+                    if availableModels.isEmpty {
+                        Text("No models found. Please download one in the Models tab.")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.horizontal)
+                    } else {
+                        Picker("Model", selection: $selectedModel) {
+                            ForEach(availableModels, id: \.self) { model in
+                                Text(model.capitalized).tag(model)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding(.horizontal)
                     }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
                     
                     // Actions
                     HStack(spacing: 20) {
@@ -108,6 +116,7 @@ struct ExtractionView: View {
                 }
             }
             .navigationTitle("Extraction")
+            .onAppear(perform: refreshModels)
             .fileImporter(
                 isPresented: $isImporting,
                 allowedContentTypes: [UTType.audio, UTType.movie],
@@ -138,6 +147,37 @@ struct ExtractionView: View {
                     print("Save cancelled or failed")
                 }
             }
+        }
+    }
+
+    
+    func refreshModels() {
+        let fileManager = FileManager.default
+        guard let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        
+        do {
+            let files = try fileManager.contentsOfDirectory(at: docDir, includingPropertiesForKeys: nil)
+            let models = files.filter { $0.lastPathComponent.hasPrefix("ggml-") && $0.lastPathComponent.hasSuffix(".bin") }
+                              .map { $0.lastPathComponent.replacingOccurrences(of: "ggml-", with: "").replacingOccurrences(of: ".bin", with: "") }
+            
+            // Define standard order for sorting
+            let order = ["tiny", "base", "small", "medium", "large"]
+            
+            self.availableModels = models.sorted { (a, b) -> Bool in
+                let indexA = order.firstIndex(of: a) ?? Int.max
+                let indexB = order.firstIndex(of: b) ?? Int.max
+                return indexA < indexB
+            }
+            
+            // Auto-select first available if current selection is invalid
+            if !availableModels.contains(selectedModel) {
+                if let first = availableModels.first {
+                    selectedModel = first
+                }
+            }
+        } catch {
+            print("Error listing models: \(error)")
+            self.availableModels = []
         }
     }
     

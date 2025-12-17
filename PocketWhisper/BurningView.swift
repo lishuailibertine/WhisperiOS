@@ -16,6 +16,29 @@ struct BurningView: View {
     @State private var statusMessage = "Ready to burn."
     @State private var progress: Double = 0.0
     
+    // Style Settings
+    @State private var fontSize: Double = 24
+    @State private var marginV: Double = 20
+    @State private var selectedColor: Color = .white // Use Color struct
+    @State private var alignment: Int = 2 // 2=Bottom Center
+    @State private var selectedFontName: String = "Default"
+    
+    // Helper to convert Color to ASS format (&HBBGGRR)
+    func getASSColorHex(from color: Color) -> String {
+        guard let components = color.cgColor?.components else { return "&H00FFFFFF" }
+        // SwiftUI colors might have 2 (grayscale) or 4 (rgba) components
+        let r: CGFloat = components.count >= 3 ? components[0] : components[0]
+        let g: CGFloat = components.count >= 3 ? components[1] : components[0]
+        let b: CGFloat = components.count >= 3 ? components[2] : components[0]
+        
+        let rInt = Int(r * 255)
+        let gInt = Int(g * 255)
+        let bInt = Int(b * 255)
+        
+        // Format: &H00BBGGRR (Alpha is 00 for opaque)
+        return String(format: "&H00%02X%02X%02X", bInt, gInt, rInt)
+    }
+    
     var body: some View {
         NavigationView {
             Form {
@@ -67,6 +90,49 @@ struct BurningView: View {
                     if let url = subtitleURL {
                         Text(url.lastPathComponent).font(.caption).foregroundColor(.secondary)
                     }
+                }
+                
+                Section(header: Text("Subtitle Style")) {
+                    // Font Size
+                    HStack {
+                        Text("Font Size")
+                        Slider(value: $fontSize, in: 10...60, step: 2)
+                        Text("\(Int(fontSize))")
+                            .monospacedDigit()
+                    }
+                    
+                    // Margin Vertical
+                    HStack {
+                        Text("Bottom Margin")
+                        Slider(value: $marginV, in: 0...100, step: 5)
+                        Text("\(Int(marginV))")
+                            .monospacedDigit()
+                    }
+                    
+                    // Color Picker (Custom)
+                    ColorPicker("Font Color", selection: $selectedColor)
+                    
+                    // Alignment
+                    Picker("Position", selection: $alignment) {
+                        Text("Bottom Center").tag(2)
+                        Text("Top Center").tag(6)
+                        Text("Center").tag(10)
+                        Text("Bottom Left").tag(1)
+                    }
+                    
+                    // Font Selection (Requires .ttf files in Bundle)
+                    // (Commented out until custom fonts are added)
+                    /*
+                    Picker("Font", selection: $selectedFontName) {
+                        Text("Default (Sans)").tag("Default")
+                        Text("Custom (Add a .ttf)").tag("Custom")
+                    }
+                    .onChange(of: selectedFontName) { newValue in
+                        if newValue == "Custom" {
+                           statusMessage = "Ensure you added 'Custom.ttf' to Xcode project!"
+                        }
+                    }
+                    */
                 }
                 
                 Section(header: Text("Actions")) {
@@ -176,8 +242,16 @@ struct BurningView: View {
                 }
                 
                 // 3. Build FFmpeg Command (using clean local paths)
+                
+                // Construct Style String
+                // Example: "FontSize=24,PrimaryColour=&H00FFFF,Alignment=2,MarginV=20,Outline=1,Shadow=0"
+                // OLD: let colorCode = self.colorMap[self.fontColor] ?? "&H00FFFFFF"
+                let colorCode = self.getASSColorHex(from: self.selectedColor)
+                let styleStr = "FontSize=\(Int(self.fontSize)),PrimaryColour=\(colorCode),Alignment=\(self.alignment),MarginV=\(Int(self.marginV)),Outline=1,OutlineColour=&H00000000,BorderStyle=1"
+                
                 // Escape simple quotes for the subtitle filter just in case
-                let cmd = "-y -i \"\(tempVideoPath.path)\" -vf \"subtitles='\(tempSubPath.path)'\" \"\(tempOutputPath.path)\""
+                // Use :force_style='...'
+                let cmd = "-y -i \"\(tempVideoPath.path)\" -vf \"subtitles='\(tempSubPath.path)':force_style='\(styleStr)'\" \"\(tempOutputPath.path)\""
                 
                 print("FFmpeg Cmd: \(cmd)")
                 
