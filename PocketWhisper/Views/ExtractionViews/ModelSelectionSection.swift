@@ -6,24 +6,24 @@
 //
 import SwiftUI
 
-struct ModelSelectionSection: View {
+struct ModelPickerSection: View {
     @Binding var availableModels: [String]
     @Binding var selectedModel: String
     
     var body: some View {
-        if availableModels.isEmpty {
-            Text("No models found. Please download one in the Models tab.")
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Model")
                 .font(.caption)
-                .foregroundColor(.red)
-                .padding(.horizontal)
-        } else {
-            Picker("Model", selection: $selectedModel) {
+                .foregroundColor(.secondary)
+            
+            Picker("", selection: $selectedModel) {
                 ForEach(availableModels, id: \.self) { model in
                     Text(model.capitalized).tag(model)
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
         }
     }
 }

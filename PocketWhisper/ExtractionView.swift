@@ -27,13 +27,13 @@ struct ExtractionView: View {
                     FileSelectionSection(selectedFileURL: $selectedFileURL)
                     
                     // 2. 模型选择区
-                    ModelSelectionSection(
+                    ModelPickerSection(
                         availableModels: $availableModels,
                         selectedModel: $selectedModel
                     )
                     
                     // 3. 语言选择区
-                    LanguageSelectionSection(selectedLanguage: $selectedLanguage)
+                    LanguagePickerSection(selectedLanguage: $selectedLanguage)
                     
                     // 4. 操作按钮区
                     ActionButtonsSection(

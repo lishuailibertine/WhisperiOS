@@ -6,17 +6,24 @@
 //
 import SwiftUI
 
-struct LanguageSelectionSection: View {
+struct LanguagePickerSection: View {
     @Binding var selectedLanguage: String
     
     var body: some View {
-        Picker("Language", selection: $selectedLanguage) {
-            Text("Auto").tag("auto")
-            Text("Chinese (Simplified)").tag("zh")
-            Text("English").tag("en")
-            Text("Japanese").tag("ja")
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Language")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            Picker("", selection: $selectedLanguage) {
+                Text("Auto").tag("auto")
+                Text("Chinese (Simplified)").tag("zh")
+                Text("English").tag("en")
+                Text("Japanese").tag("ja")
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
         }
-        .pickerStyle(SegmentedPickerStyle())
-        .padding(.horizontal)
     }
 }

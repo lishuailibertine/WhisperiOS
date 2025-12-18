@@ -14,32 +14,39 @@ struct ActionButtonsSection: View {
     let onTranscribe: () -> Void
     
     var body: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: 16) { // 调整按钮间距
+            // 选择文件按钮
             PhotosPicker(
                 selection: $selectedPhotoItem,
                 matching: .any(of: [.videos])
             ) {
-                Label("Select from Photos", systemImage: "photo.on.rectangle")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                HStack(spacing: 8) {
+                    Text("Select from Photos")
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(16) // 更大圆角，更现代
+                .shadow(color: .blue.opacity(0.2), radius: 4)
             }
             .onChange(of: selectedPhotoItem, perform: onSelectPhoto)
             
+            // 转录按钮（仅文件选择后显示）
             if selectedFileURL != nil {
                 Button(action: onTranscribe) {
-                    Label(isProcessing ? "Processing..." : "Transcribe", systemImage: "play.fill")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isProcessing ? Color.gray : Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    HStack(spacing: 8) {
+                        Text(isProcessing ? "Processing..." : "Transcribe")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(isProcessing ? Color.gray : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(16)
+                    .shadow(color: (isProcessing ? Color.gray : Color.green).opacity(0.2), radius: 4)
                 }
                 .disabled(isProcessing)
             }
         }
-        .padding(.horizontal)
     }
 }
