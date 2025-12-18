@@ -1,7 +1,8 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PhotosUI
-
+import AVFoundation
+import UniformTypeIdentifiers
 // MARK: - 主视图
 struct ExtractionView: View {
     // MARK: - 状态管理
@@ -77,154 +78,6 @@ struct ExtractionView: View {
                 handleExportResult(result)
             }
         }
-    }
-}
-
-// MARK: - 子View拆分（无修改，复用之前的）
-private struct FileSelectionSection: View {
-    @Binding var selectedFileURL: URL?
-    
-    var body: some View {
-        if let url = selectedFileURL {
-            VStack {
-                Image(systemName: "doc.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 60)
-                    .foregroundColor(.blue)
-                Text(url.lastPathComponent)
-                    .font(.headline)
-                    .lineLimit(1)
-            }
-            .padding()
-            .background(Color(.secondarySystemBackground))
-            .cornerRadius(12)
-        } else {
-            ContentUnavailableView(
-                "No Media Selected",
-                systemImage: "waveform.badge.plus",
-                description: Text("Select an audio or video file to begin.")
-            )
-        }
-    }
-}
-
-private struct ModelSelectionSection: View {
-    @Binding var availableModels: [String]
-    @Binding var selectedModel: String
-    
-    var body: some View {
-        if availableModels.isEmpty {
-            Text("No models found. Please download one in the Models tab.")
-                .font(.caption)
-                .foregroundColor(.red)
-                .padding(.horizontal)
-        } else {
-            Picker("Model", selection: $selectedModel) {
-                ForEach(availableModels, id: \.self) { model in
-                    Text(model.capitalized).tag(model)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
-        }
-    }
-}
-
-private struct LanguageSelectionSection: View {
-    @Binding var selectedLanguage: String
-    
-    var body: some View {
-        Picker("Language", selection: $selectedLanguage) {
-            Text("Auto").tag("auto")
-            Text("Chinese (Simplified)").tag("zh")
-            Text("English").tag("en")
-            Text("Japanese").tag("ja")
-        }
-        .pickerStyle(SegmentedPickerStyle())
-        .padding(.horizontal)
-    }
-}
-
-private struct ActionButtonsSection: View {
-    let selectedFileURL: URL?
-    @Binding var isProcessing: Bool
-    @Binding var selectedPhotoItem: PhotosPickerItem?
-    let onSelectPhoto: (PhotosPickerItem?) -> Void
-    let onTranscribe: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 20) {
-            PhotosPicker(
-                selection: $selectedPhotoItem,
-                matching: .any(of: [.videos])
-            ) {
-                Label("Select from Photos", systemImage: "photo.on.rectangle")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .onChange(of: selectedPhotoItem, perform: onSelectPhoto)
-            
-            if selectedFileURL != nil {
-                Button(action: onTranscribe) {
-                    Label(isProcessing ? "Processing..." : "Transcribe", systemImage: "play.fill")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isProcessing ? Color.gray : Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .disabled(isProcessing)
-            }
-        }
-        .padding(.horizontal)
-    }
-}
-
-private struct ExportButtonSection: View {
-    let isProcessing: Bool
-    let transcriptionResult: String
-    let onExport: () -> Void
-    
-    var body: some View {
-        if !transcriptionResult.isEmpty && !isProcessing && transcriptionResult != "No transcription yet." {
-            Button(action: onExport) {
-                Label("Save as .SRT", systemImage: "square.and.arrow.up")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.orange)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal)
-        }
-    }
-}
-
-private struct TranscriptionOutputSection: View {
-    @Binding var result: String
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Transcription Output")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
-            Text(result)
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .textSelection(.enabled)
-                .background(Color(.systemBackground))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color(.separator), lineWidth: 1)
-                )
-        }
-        .padding()
     }
 }
 
@@ -344,29 +197,5 @@ extension ExtractionView {
         case .failure(let error):
             print("Save failed: \(error.localizedDescription)")
         }
-    }
-}
-
-// MARK: - 字幕文件文档（补充完整）
-struct SubtitleDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.plainText] }
-    static var writableContentTypes: [UTType] { [.plainText] }
-    
-    var text: String
-    
-    init(text: String) {
-        self.text = text
-    }
-    
-    init(configuration: ReadConfiguration) throws {
-        text = configuration.file.regularFileContents
-            .flatMap { String(data: $0, encoding: .utf8) } ?? ""
-    }
-    
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        guard let data = text.data(using: .utf8) else {
-            throw NSError(domain: "SubtitleDocument", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode text to UTF-8"])
-        }
-        return FileWrapper(regularFileWithContents: data)
     }
 }
