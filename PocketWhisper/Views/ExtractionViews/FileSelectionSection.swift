@@ -26,11 +26,16 @@ struct FileSelectionSection: View {
             if let url = selectedFileURL {
                 filePreviewView(for: url)
             } else {
-                emptyStateView
+                if isLoadingMedia {
+                    loadingStateView
+                } else {
+                    emptyStateView
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: selectedFileURL) // 平滑过渡动画
         .animation(.easeInOut(duration: 0.2), value: videoThumbnail)
+        .animation(.easeInOut(duration: 0.2), value: isLoadingMedia)
     }
 }
 
@@ -119,6 +124,28 @@ private extension FileSelectionSection {
             .padding()
             .background(Color(.secondarySystemBackground))
             .cornerRadius(cornerRadius)
+    }
+    
+    /// 加载中状态视图（替换空状态）
+    var loadingStateView: some View {
+        VStack(spacing: 16) {
+            ProgressView {
+                Text("Loading media...")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            .progressViewStyle(.circular)
+            Text("Please wait while we process your file")
+                .font(.caption)
+                .foregroundColor(.gray)
+        }
+        .frame(maxWidth: .infinity, minHeight: 180)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(Color(.systemGray4), lineWidth: 0.5)
+        )
     }
     
     /// 删除按钮
