@@ -18,13 +18,15 @@ struct ExtractionView: View {
     @State private var isExporting: Bool = false
     @State private var exportText: String = "" // 存储要导出的文本，而非可选的Document
     
+    // 新增：标记是否正在加载相册文件/生成缩略图
+    @State private var isLoadingMedia: Bool = false
     // MARK: - 主Body
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     // 1. 文件选择区
-                    FileSelectionSection(selectedFileURL: $selectedFileURL)
+                    FileSelectionSection(selectedFileURL: $selectedFileURL, isLoadingMedia: $isLoadingMedia)
                     
                     // 2. 模型选择区
                     ModelPickerSection(
@@ -122,19 +124,29 @@ extension ExtractionView {
         }
     }
     
-    // 处理相册选择的媒体文件
+    // 处理相册选择（新增加载状态）
     func handlePhotoItemSelection(_ item: PhotosPickerItem?) {
         guard let item = item else { return }
         
+        // 立即标记为加载中，显示指示器
+        Task { @MainActor in
+            isLoadingMedia = true
+            selectedFileURL = nil // 清空旧文件，避免显示旧缩略图
+        }
+        // 异步处理文件导出，不阻塞主线程
         Task {
             do {
                 if let tempURL = try await exportToTemporaryFile(from: item) {
                     await MainActor.run {
                         selectedFileURL = tempURL
+                        // 缩略图生成由FileSelectionSection的onAppear触发，此处仅标记加载中
                     }
                 }
             } catch {
                 print("Failed to load media: \(error)")
+                await MainActor.run {
+                    isLoadingMedia = false // 加载失败，停止指示器
+                }
             }
         }
     }

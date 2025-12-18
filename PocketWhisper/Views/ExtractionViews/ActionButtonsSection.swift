@@ -14,28 +14,28 @@ struct ActionButtonsSection: View {
     let onTranscribe: () -> Void
     
     var body: some View {
-        HStack(spacing: 16) { // 调整按钮间距
-            // 选择文件按钮
+        HStack(spacing: 16) {
             PhotosPicker(
                 selection: $selectedPhotoItem,
                 matching: .any(of: [.videos])
             ) {
                 HStack(spacing: 8) {
+                    Image(systemName: "photo.on.rectangle")
                     Text("Select from Photos")
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color.blue)
                 .foregroundColor(.white)
-                .cornerRadius(16) // 更大圆角，更现代
+                .cornerRadius(16)
                 .shadow(color: .blue.opacity(0.2), radius: 4)
             }
             .onChange(of: selectedPhotoItem, perform: onSelectPhoto)
             
-            // 转录按钮（仅文件选择后显示）
             if selectedFileURL != nil {
                 Button(action: onTranscribe) {
                     HStack(spacing: 8) {
+                        Image(systemName: isProcessing ? "hourglass" : "play.fill")
                         Text(isProcessing ? "Processing..." : "Transcribe")
                     }
                     .frame(maxWidth: .infinity)
