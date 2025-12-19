@@ -299,9 +299,13 @@ struct BurningView: View {
                 let colorCode = self.getASSColorHex(from: self.selectedColor)
                 let styleStr = "FontSize=\(Int(self.fontSize)),PrimaryColour=\(colorCode),Alignment=\(self.alignment),MarginV=\(Int(self.marginV)),Outline=1,OutlineColour=&H00000000,BorderStyle=1"
                 
-                // Escape simple quotes for the subtitle filter just in case
-                // Use :force_style='...'
-                let cmd = "-y -i \"\(tempVideoPath.path)\" -vf \"subtitles='\(tempSubPath.path)':force_style='\(styleStr)'\" \"\(tempOutputPath.path)\""
+                // 核心修复：转义路径 + 硬件编码器
+                let escapedSubPath = tempSubPath.path.replacingOccurrences(of: "'", with: "\\'")
+                let cmd = "-y -i \"\(tempVideoPath.path)\" " +
+                "-vf \"subtitles='\(escapedSubPath)':force_style='\(styleStr)'\" " +
+                "-c:v h264_videotoolbox -b:v 5M " +
+                "-c:a copy " +
+                "\"\(tempOutputPath.path)\""
                 
                 print("FFmpeg Cmd: \(cmd)")
                 
