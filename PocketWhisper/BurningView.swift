@@ -1,7 +1,10 @@
-
 import SwiftUI
 import UniformTypeIdentifiers
 import ffmpegkit
+import PhotosUI // 仅新增这个导入
+import UIKit
+import AVFoundation // 仅新增这个导入
+
 // ⚠️ IMPORTANT:
 // To make this work, you MUST add 'ffmpeg-kit-ios-min' or 'ffmpeg-kit-ios-full' package to your Xcode project.
 // Package URL: https://github.com/tanersener/ffmpeg-kit
@@ -23,6 +26,9 @@ struct BurningView: View {
     @State private var alignment: Int = 2 // 2=Bottom Center
     @State private var selectedFontName: String = "Default"
     
+    // 仅新增：PhotosPicker状态
+    @State private var selectedVideoItem: PhotosPickerItem?
+    
     // Helper to convert Color to ASS format (&HBBGGRR)
     func getASSColorHex(from color: Color) -> String {
         guard let components = color.cgColor?.components else { return "&H00FFFFFF" }
@@ -43,13 +49,12 @@ struct BurningView: View {
         NavigationView {
             Form {
                 Section(header: Text("Source Files")) {
-                    // Video Selector
-                    Button(action: {
-                        print("Select Video Tapped")
-                        importingTarget = .video
-                        activeContentType = [.movie, .video, .quickTimeMovie]
-                        isImporting = true
-                    }) {
+                    // 仅修改这里：替换原视频Button为PhotosPicker
+                    PhotosPicker(
+                        selection: $selectedVideoItem,
+                        matching: .videos,
+                        photoLibrary: .shared()
+                    ) {
                         HStack {
                             Label("Select Video", systemImage: "film")
                                 .foregroundColor(.primary)
@@ -69,7 +74,7 @@ struct BurningView: View {
                             .listRowSeparator(.hidden)
                     }
                     
-                    // Subtitle Selector
+                    // 以下所有代码完全保留你的原始内容
                     Button(action: {
                         importingTarget = .subtitle
                         activeContentType = [.plainText] // SRT
@@ -168,9 +173,13 @@ struct BurningView: View {
         ) { result in
             handleFileSelection(result: result)
         }
+        // 仅新增：监听视频选择变化
+        .task(id: selectedVideoItem) {
+            await loadSelectedVideo()
+        }
     }
     
-    // Unified state to avoid SwiftUI conflict with multiple fileImporters
+    // 完全保留你的原始状态
     @State private var isImporting = false
     @State private var activeContentType: [UTType] = [.movie]
     @State private var importingTarget: ImportTarget = .video
@@ -180,6 +189,7 @@ struct BurningView: View {
         case subtitle
     }
 
+    // 完全保留你的原始方法
     func handleFileSelection(result: Result<[URL], Error>) {
         do {
             let url = try result.get().first!
@@ -195,6 +205,46 @@ struct BurningView: View {
         }
     }
     
+    // 仅新增：修复后的视频加载方法（核心修改）
+    private func loadSelectedVideo() async {
+        guard let selectedItem = selectedVideoItem else {
+            videoURL = nil
+            return
+        }
+        
+        do {
+            // 参考你的方法导出临时文件
+            guard let tempURL = try await exportToTemporaryFile(from: selectedItem) else {
+                throw NSError(domain: "VideoImport", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid video data"])
+            }
+            
+            // 移除不必要的 startAccessingSecurityScopedResource 调用
+            videoURL = tempURL
+            statusMessage = "Ready to burn."
+            
+        } catch {
+            statusMessage = "Error loading video: \(error.localizedDescription)"
+            selectedVideoItem = nil
+            videoURL = nil
+        }
+    }
+    
+    // 仅新增：你的原始导出方法（仅修复NSError）
+    private func exportToTemporaryFile(from item: PhotosPickerItem) async throws -> URL? {
+        guard let data = try await item.loadTransferable(type: Data.self) else {
+            return nil
+        }
+        
+        let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "mov"
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(ext)
+        
+        try data.write(to: tempURL)
+        return tempURL
+    }
+    
+    // 完全保留你的原始 startBurning 方法（一字未改）
     func startBurning() {
         guard let video = videoURL, let sub = subtitleURL else { return }
         

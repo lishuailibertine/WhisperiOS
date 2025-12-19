@@ -20,7 +20,9 @@ class WhisperManager: ObservableObject {
         self.params.print_progress = false
         self.params.print_timestamps = true
         self.params.translate = false
-        self.params.n_threads = 4 // Lower threads to save memory on larger models
+        // 动态线程数：留1核给系统，避免卡顿
+        let processorCount = ProcessInfo.processInfo.activeProcessorCount
+        self.params.n_threads = Int32(max(2, min(processorCount - 1, 8)))
         
         // Auto-detect language
         // In C-API, usually nullptr means auto-detect.
@@ -69,9 +71,8 @@ class WhisperManager: ObservableObject {
         print("Loading model from \(modelURL.path)...")
         
         // 1. Context Params
-        let cparams = whisper_context_default_params()
+        var cparams = whisper_context_default_params()
         // cparams.use_gpu = true // If newer version supports CoreML/Metal flags here
-        
         // 2. Init Context
         // Using C-String bridge
         self.ctx = whisper_init_from_file_with_params(modelURL.path, cparams)
